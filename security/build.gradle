@@ -1,0 +1,5 @@
+dependencies {
+    implementation('io.jsonwebtoken:jjwt:0.2')
+    implementation project(':service')
+    implementation project(':repository')
+}

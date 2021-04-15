@@ -1,0 +1,8 @@
+rootProject.name = 'gift'
+
+include 'controller'
+include 'security'
+include 'service'
+include 'repository'
+
+
