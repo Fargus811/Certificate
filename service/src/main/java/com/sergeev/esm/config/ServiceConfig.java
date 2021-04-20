@@ -23,6 +23,12 @@ public class ServiceConfig {
         return new ModelMapper();
     }
 
+
+    /**
+     * BCrypt password encoder hash password to data base.
+     *
+     * @return the b crypt password encoder
+     */
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();

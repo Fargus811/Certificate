@@ -20,5 +20,4 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             throws IOException, ServletException {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed");
     }
-
 }

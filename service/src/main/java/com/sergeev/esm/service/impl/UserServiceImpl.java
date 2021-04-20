@@ -14,16 +14,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -58,15 +53,10 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findById(id);
         if (userOptional.isEmpty()) {
             throw new ResourceIdNotFoundException(
-                    new ObjectError(id.toString(), "Exception.userWithIdNotFounded"));
+                    new ObjectError(id.toString(), "Exception.userWithIdNotFound"));
         }
         User user = userOptional.get();
         return modelMapper.map(user, UserDTO.class);
-    }
-
-    private User findByUserName(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new UsernameNotFoundException(String.format("User with username '%s' not found", username)));
     }
 
     @Override
@@ -74,12 +64,12 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.findByUsername(userForm.getUsername());
         if (userOptional.isPresent()) {
             throw new ResourceFoundException(new ObjectError(userForm.getUsername(),
-                    "Exception.userWithNameFounded"));
+                    "Exception.userWithNameFound"));
         }
 
         Role roleUser = roleRepository.findByName(ROLE_USER_FROM_DB)
                 .orElseThrow(() -> new ResourceFoundException(new ObjectError(userForm.getUsername(),
-                        "Exception.roleWithNameNotFounded")));
+                        "Exception.roleWithNameNotFound")));
 
         Set<Role> userRoles = new HashSet<>();
         userRoles.add(roleUser);
@@ -95,18 +85,6 @@ public class UserServiceImpl implements UserService {
 
         User registeredUser = userRepository.save(user);
         return modelMapper.map(registeredUser, UserDTO.class);
-    }
-
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = findByUserName(username);
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
-                mapRolesToAuthorities(user.getRoles()));
-    }
-
-    private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Set<Role> roleSet) {
-        return roleSet.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
 }
 

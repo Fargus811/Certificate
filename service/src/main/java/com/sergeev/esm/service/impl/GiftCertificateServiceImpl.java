@@ -43,7 +43,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             return modelMapper.map(giftCertificate, GiftCertificateReturnDTO.class);
         } else {
             throw new ResourceIdNotFoundException(
-                    new ObjectError(id.toString(), "Exception.certificateWithIdNotFounded"));
+                    new ObjectError(id.toString(), "Exception.certificateWithIdNotFound"));
         }
     }
 
@@ -67,7 +67,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         String giftCertificateName = giftCertificate.getName();
         if (giftCertificateRepository.findByName(giftCertificateName).isPresent()) {
             throw new ResourceFoundException(new ObjectError(giftCertificateName,
-                    "Exception.certificateWithNameFounded"));
+                    "Exception.certificateWithNameFound"));
         } else {
             giftCertificate.setCreateDate(LocalDateTime.now(ZoneId.systemDefault()));
             giftCertificate.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
@@ -94,7 +94,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             giftCertificateRepository.save(resultCertificate);
         } else {
             throw new ResourceIdNotFoundException(new ObjectError(giftCertificateToUpdate.getId().toString(),
-                    "Exception.certificateWithIdNotFounded"));
+                    "Exception.certificateWithIdNotFound"));
         }
     }
 
@@ -132,7 +132,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             giftCertificateRepository.deleteById(id);
         } else {
             throw new ResourceIdNotFoundException
-                    (new ObjectError(id.toString(), "Exception.certificateWithIdNotFounded"));
+                    (new ObjectError(id.toString(), "Exception.certificateWithIdNotFound"));
         }
     }
 }

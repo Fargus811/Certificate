@@ -4,12 +4,12 @@ import com.sergeev.esm.dto.RegistrationForm;
 import com.sergeev.esm.dto.UserDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetailsService;
+
 
 /**
  * The interface User service.
  */
-public interface UserService extends UserDetailsService {
+public interface UserService {
 
     /**
      * Find by id user.
@@ -22,9 +22,17 @@ public interface UserService extends UserDetailsService {
     /**
      * Find all userDTO list.
      *
+     * @param pageable the pageable
      * @return the list
      */
     Page<UserDTO> findAll(Pageable pageable);
 
+
+    /**
+     * Register user in system.
+     *
+     * @param registrationForm the registration form
+     * @return the user dto
+     */
     UserDTO register(RegistrationForm registrationForm);
 }

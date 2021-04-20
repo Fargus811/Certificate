@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
             return modelMapper.map(order, OrderDTO.class);
         } else {
             throw new ResourceIdNotFoundException(
-                    new ObjectError(id.toString(), "Exception.orderWithIdNotFounded"));
+                    new ObjectError(id.toString(), "Exception.orderWithIdNotFound"));
         }
     }
 
@@ -85,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
             return modelMapper.map(orderRepository.save(order), OrderDTO.class);
         } else {
             throw new ResourceIdNotFoundException(
-                    new ObjectError(userOptional.toString(), "Exception.userWithIdNotFounded"));
+                    new ObjectError(userOptional.toString(), "Exception.userWithIdNotFound"));
         }
     }
 
@@ -99,7 +99,7 @@ public class OrderServiceImpl implements OrderService {
                 giftCertificateList.add(giftCertificate);
             } else {
                 throw new ResourceIdNotFoundException(
-                        new ObjectError(giftId.toString(), "Exception.certificateWithIdNotFounded"));
+                        new ObjectError(giftId.toString(), "Exception.certificateWithIdNotFound"));
             }
         }
         return price;

@@ -8,7 +8,7 @@ import org.springframework.validation.ObjectError;
  */
 public class ResourceFoundException extends RestException {
 
-    private static final String MESSAGE_ERROR = "Exception.recourseFounded";
+    private static final String MESSAGE_ERROR = "Exception.recourseFound";
     private static final int ERROR_CODE = 40409;
 
     /**

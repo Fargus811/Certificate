@@ -45,7 +45,7 @@ public class GiftCertificateController {
      */
     @SuppressWarnings("deprecation")
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_USER', 'ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public PagedModel<GiftCertificateReturnDTO> findAllByParams(
             @RequestParam(required = false) Set<@NotEmpty String> tagNames, Pageable pageable) {
         Page<GiftCertificateReturnDTO> giftCertificateReturnDTOPage = Objects.isNull(tagNames)

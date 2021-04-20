@@ -30,11 +30,15 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
 
     private void validateJwt(HttpServletRequest request) {
+        String provider = "default";
         final String requestTokenHeader = request.getHeader(AUTHORIZATION);
+        if (request.getRequestURI().contains("google")){
+            provider = "google";
+        }
         if (requestTokenHeader != null && requestTokenHeader.startsWith(BEARER)) {
             String jwtToken = requestTokenHeader.substring(BEARER_HEADER_OFFSET);
             try {
-                if (!jwtTokenProvider.validateToken(jwtTokenProvider.resolveToken(request))) {
+                if (!jwtTokenProvider.validateToken(jwtTokenProvider.resolveToken(request), provider)) {
                     throw new JwtAuthenticationException("JWT token is expired or invalid");
                 }
                 String username = jwtTokenProvider.getUsernameFromToken(jwtToken);

@@ -5,7 +5,6 @@ import com.sergeev.esm.dto.TagDTO;
 import com.sergeev.esm.entity.Tag;
 import com.sergeev.esm.exception.ResourceFoundException;
 import com.sergeev.esm.exception.ResourceIdNotFoundException;
-import com.sergeev.esm.exception.RestException;
 import com.sergeev.esm.repository.TagRepository;
 import com.sergeev.esm.service.TagService;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +12,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
@@ -37,7 +35,7 @@ public class TagServiceImpl implements TagService {
         Tag tag = modelMapper.map(tagDTO, Tag.class);
         if (tagRepository.findByName(tag.getName()).isPresent()) {
             throw new ResourceFoundException(new ObjectError(tag.getName(),
-                    "Exception.tagWithNameFounded"));
+                    "Exception.tagWithNameFound"));
         }
         return modelMapper.map(tagRepository.save(tag), TagDTO.class);
     }
@@ -49,7 +47,7 @@ public class TagServiceImpl implements TagService {
         Tag tag = modelMapper.map(tagDTO, Tag.class);
         if (tagRepository.findByName(tag.getName()).isPresent()) {
             throw new ResourceFoundException(new ObjectError(tag.getName(),
-                    "Exception.tagWithNameFounded"));
+                    "Exception.tagWithNameFound"));
         }
         this.findById(tag.getId());
         tagRepository.save(tag);
@@ -60,7 +58,7 @@ public class TagServiceImpl implements TagService {
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
             throw new ResourceIdNotFoundException
-                    (new ObjectError(id.toString(), "Exception.tagWithIdNotFounded"));
+                    (new ObjectError(id.toString(), "Exception.tagWithIdNotFound"));
         }
         tagRepository.deleteById(id);
     }
@@ -70,7 +68,7 @@ public class TagServiceImpl implements TagService {
         Optional<Tag> tagOptional = tagRepository.findById(id);
         if (tagOptional.isEmpty()) {
             throw new ResourceIdNotFoundException
-                    (new ObjectError(id.toString(), "Exception.tagWithIdNotFounded"));
+                    (new ObjectError(id.toString(), "Exception.tagWithIdNotFound"));
         }
         return modelMapper.map(tagOptional.get(), TagDTO.class);
     }
@@ -91,7 +89,7 @@ public class TagServiceImpl implements TagService {
         Optional<Tag> usersMostWidelyUsedTag = tagRepository.findUsersMostWidelyUsedTag();
         if (usersMostWidelyUsedTag.isEmpty()) {
             throw new ResourceIdNotFoundException
-                    (new ObjectError(usersMostWidelyUsedTag.toString(), "Exception.tagNotFounded"));
+                    (new ObjectError(usersMostWidelyUsedTag.toString(), "Exception.tagNotFound"));
         }
         return modelMapper.map(usersMostWidelyUsedTag.get(), TagDTO.class);
     }

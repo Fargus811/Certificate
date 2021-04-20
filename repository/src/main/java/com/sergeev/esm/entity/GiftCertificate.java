@@ -19,7 +19,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
  * The type Gift certificate.
  */
 @Entity
-@Table(name = "gift_certificate", schema = "gift")
+@Table(name = "gift_certificate")
 @Data
 @Builder
 @AllArgsConstructor
@@ -46,7 +46,7 @@ public class GiftCertificate {
     @LastModifiedDate
     private LocalDateTime lastUpdateDate;
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
-    @JoinTable(name = "gift_tags", schema = "gift",
+    @JoinTable(name = "gift_tags",
             joinColumns = @JoinColumn(name = "gift_certificate_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )

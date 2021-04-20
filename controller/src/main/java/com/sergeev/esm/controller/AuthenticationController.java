@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v3")
+//@RequestMapping("/api/v3")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
@@ -26,7 +26,7 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity generate(@RequestBody AuthenticationRequest authenticationRequest) {
+    public ResponseEntity<Map<Object, Object>> generate(@RequestBody AuthenticationRequest authenticationRequest) {
         String token = authenticationService.generateToken(authenticationRequest);
         Map<Object, Object> response = new HashMap<>();
         response.put(TOKEN_KEY, token);

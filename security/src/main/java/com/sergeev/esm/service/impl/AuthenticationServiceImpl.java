@@ -42,7 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (BadCredentialsException e) {
             throw new AuthenticateException("Exception.recourseNotFound",
                     new ObjectError(authenticationRequest.toString(),
-                            "Exception.certificateWithIdNotFounded"));
+                            "Exception.certificateWithIdNotFound"));
         }
     }
 }

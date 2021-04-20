@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -39,7 +40,9 @@ public class JwtTokenProvider {
     private static final int CONVERT_TO_MILLIS = 1000;
 
     @Value("${jwt.secret}")
-    private String SECRET ;
+    private String SECRET;
+    @Value("${google.jwt.secret}")
+    private String SECRET_GOOGLE;
     @Value("${jwt.token.validity}")
     private long JWT_TOKEN_VALIDITY;
 
@@ -136,9 +139,10 @@ public class JwtTokenProvider {
      * @param token the token
      * @return the boolean
      */
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, String provider) {
+        String signingKey = (provider.equals("google")) ? SECRET_GOOGLE : SECRET;
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtAuthenticationException("JWT token is expired or invalid");
@@ -151,17 +155,18 @@ public class JwtTokenProvider {
      * @param token the token
      * @return the authentication
      */
-    public Authentication getAuthentication(String token) {
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));
+    public Authentication getAuthentication(String token, String provider) {
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token, provider));
         return new UsernamePasswordAuthenticationToken(userDetails, EMPTY_LINE, userDetails.getAuthorities());
     }
 
-    private String getUsername(String token) {
+    private String getUsername(String token, String provider) {
         String userName;
+        String signingKey = (provider.equals("google")) ? SECRET_GOOGLE : SECRET;
         try {
-            userName = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getSubject();
+            userName = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
-            throw new JwtAuthenticationException("JWT token is expired or invalid");
+            throw new JwtAuthenticationException("JWT token is expired or invalid, signKey");
         }
         return userName;
     }
