@@ -40,7 +40,6 @@ public class TagServiceImpl implements TagService {
         return modelMapper.map(tagRepository.save(tag), TagDTO.class);
     }
 
-
     @Override
     @Transactional
     public void update(AbstractDTO tagDTO) {

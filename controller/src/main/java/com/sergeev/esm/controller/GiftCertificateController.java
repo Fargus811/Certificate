@@ -11,7 +11,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +44,7 @@ public class GiftCertificateController {
      */
     @SuppressWarnings("deprecation")
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public PagedModel<GiftCertificateReturnDTO> findAllByParams(
             @RequestParam(required = false) Set<@NotEmpty String> tagNames, Pageable pageable) {
         Page<GiftCertificateReturnDTO> giftCertificateReturnDTOPage = Objects.isNull(tagNames)

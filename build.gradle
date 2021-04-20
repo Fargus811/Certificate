@@ -30,11 +30,9 @@ subprojects {
 
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web'
-        // https://mvnrepository.com/artifact/org.postgresql/postgresql
         implementation group: 'org.postgresql', name: 'postgresql', version: '42.2.18'
         implementation group: 'org.flywaydb', name: 'flyway-maven-plugin', version: '7.7.3'
         implementation group: 'org.springframework.data', name: 'spring-data-commons'
-        // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
         implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
         implementation group: 'org.springframework.hateoas', name: 'spring-hateoas'
         implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
@@ -43,7 +41,6 @@ subprojects {
         annotationProcessor 'org.projectlombok:lombok:1.18.18'
         //security
         implementation group: 'org.springframework.security.oauth', name: 'spring-security-oauth2'
-        // https://mvnrepository.com/artifact/org.springframework.security.oauth.boot/spring-security-oauth2-autoconfigure
         implementation group: 'org.springframework.security.oauth.boot', name: 'spring-security-oauth2-autoconfigure', version: '2.3.9.RELEASE'
     }
 }

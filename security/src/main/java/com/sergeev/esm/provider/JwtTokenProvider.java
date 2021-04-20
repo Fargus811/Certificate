@@ -1,21 +1,15 @@
 package com.sergeev.esm.provider;
 
 import com.sergeev.esm.exception.JwtAuthenticationException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,8 +35,6 @@ public class JwtTokenProvider {
 
     @Value("${jwt.secret}")
     private String SECRET;
-    @Value("${google.jwt.secret}")
-    private String SECRET_GOOGLE;
     @Value("${jwt.token.validity}")
     private long JWT_TOKEN_VALIDITY;
 
@@ -139,10 +131,9 @@ public class JwtTokenProvider {
      * @param token the token
      * @return the boolean
      */
-    public boolean validateToken(String token, String provider) {
-        String signingKey = (provider.equals("google")) ? SECRET_GOOGLE : SECRET;
+    public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             throw new JwtAuthenticationException("JWT token is expired or invalid");
@@ -155,16 +146,15 @@ public class JwtTokenProvider {
      * @param token the token
      * @return the authentication
      */
-    public Authentication getAuthentication(String token, String provider) {
-        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token, provider));
+    public Authentication getAuthentication(String token) {
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(userDetails, EMPTY_LINE, userDetails.getAuthorities());
     }
 
-    private String getUsername(String token, String provider) {
+    private String getUsername(String token) {
         String userName;
-        String signingKey = (provider.equals("google")) ? SECRET_GOOGLE : SECRET;
         try {
-            userName = Jwts.parser().setSigningKey(signingKey).parseClaimsJws(token).getBody().getSubject();
+            userName = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
             throw new JwtAuthenticationException("JWT token is expired or invalid, signKey");
         }

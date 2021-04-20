@@ -23,7 +23,6 @@ public class ServiceConfig {
         return new ModelMapper();
     }
 
-
     /**
      * BCrypt password encoder hash password to data base.
      *

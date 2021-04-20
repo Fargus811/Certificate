@@ -1,6 +1,5 @@
 package com.sergeev.esm.controller;
 
-
 import com.sergeev.esm.exception.RestException;
 import com.sergeev.esm.util.RestMessage;
 import lombok.RequiredArgsConstructor;
@@ -71,6 +70,13 @@ public class ControllerExceptionHandler {
                 RestMessage.ERROR_CODE_OF_NOT_VALID_ARGUMENTS), HttpStatus.CONFLICT);
     }
 
+    /**
+     * Handle type not valid exception response entity.
+     *
+     * @param ex     the ex
+     * @param locale the locale
+     * @return the response entity
+     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<RestMessage> handleTypeNotValidException(MethodArgumentTypeMismatchException ex, Locale locale) {
         String reasonMessage = messageSource.getMessage(INVALID_DATA_ERROR, null, locale);
@@ -80,6 +86,14 @@ public class ControllerExceptionHandler {
                 RestMessage.ERROR_CODE_OF_NOT_VALID_ARGUMENTS), HttpStatus.CONFLICT);
     }
 
+
+    /**
+     * Handle access denied exception response entity.
+     *
+     * @param ex     the ex
+     * @param locale the locale
+     * @return the response entity
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<RestMessage> handleAccessDeniedException(AccessDeniedException ex, Locale locale) {
         String reasonMessage = messageSource.getMessage(INVALID_AUTHORITIES, null, locale);

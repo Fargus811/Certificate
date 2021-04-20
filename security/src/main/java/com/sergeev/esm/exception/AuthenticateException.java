@@ -11,27 +11,6 @@ public class AuthenticateException extends RestException {
     private static final String MESSAGE_ERROR = "Exception.recourseNotFound";
     private static final int ERROR_CODE = 40401;
 
-
-    @Override
-    public ObjectError getDescription() {
-        return super.getDescription();
-    }
-
-    @Override
-    public int getErrorCode() {
-        return super.getErrorCode();
-    }
-
-    @Override
-    public HttpStatus getHttpStatus() {
-        return super.getHttpStatus();
-    }
-
-    @Override
-    public String getReason() {
-        return super.getReason();
-    }
-
     /**
      * Instantiates a new Authenticate exception.
      *

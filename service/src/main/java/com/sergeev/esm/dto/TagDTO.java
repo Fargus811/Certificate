@@ -13,7 +13,7 @@ import javax.validation.constraints.Min;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 public class TagDTO extends AbstractDTO {
 
     @Min(1L)

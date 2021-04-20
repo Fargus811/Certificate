@@ -1,9 +1,0 @@
-#security:
-#  oauth2:
-#    client:
-#      registration:
-#        google:
-#          client-id: 523233826916-uj3h9smlrmi909rfvgpad3on53o0466f.apps.googleusercontent.com
-#          client-secret: iTYZK9h3OdgJAxiPvCysc9Lw
-#          scope: openid
-#          authorization-grant-type: client_credentials

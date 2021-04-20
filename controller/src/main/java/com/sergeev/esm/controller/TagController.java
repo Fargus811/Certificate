@@ -4,7 +4,6 @@ import com.sergeev.esm.dto.AbstractDTO;
 import com.sergeev.esm.dto.TagDTO;
 import com.sergeev.esm.service.TagService;
 import com.sergeev.esm.util.HATEOASBuilder;
-import com.sergeev.esm.dto.TagDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.Optional;
 
 /**
  * The type Tag controller.

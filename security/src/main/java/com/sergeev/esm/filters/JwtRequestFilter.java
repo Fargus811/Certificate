@@ -1,9 +1,8 @@
 package com.sergeev.esm.filters;
 
-import com.sergeev.esm.entity.User;
 import com.sergeev.esm.provider.JwtTokenProvider;
-import com.sergeev.esm.service.impl.UserDetailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +29,9 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends GenericFilterBean {
 
+    public static final String NAME_ATTRIBUTE = "name";
+    public static final String BEARER_PREFIX = "Bearer ";
+
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
 
@@ -37,23 +39,21 @@ public class JwtRequestFilter extends GenericFilterBean {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
             throws IOException, ServletException {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) req);
-        String provider = "default";
-        if (((HttpServletRequest) req).getRequestURI().contains("google")) {
-            provider = "google";
-        }
-        if (token != null && jwtTokenProvider.validateToken(token, provider)
+        if (token != null && jwtTokenProvider.validateToken(token)
                 && Objects.isNull(SecurityContextHolder.getContext().getAuthentication())) {
-            Authentication auth = jwtTokenProvider.getAuthentication(token, provider);
+            Authentication auth = jwtTokenProvider.getAuthentication(token);
             if (auth != null) {
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
-        } else if (Objects.nonNull(SecurityContextHolder.getContext().getAuthentication())) {
+        } else if (Objects.nonNull(SecurityContextHolder.getContext().getAuthentication()) &&
+                !(SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken)) {
             OidcUser principal = (OidcUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            String name = principal.getAttribute("name");
+            String name = principal.getAttribute(NAME_ATTRIBUTE);
             UserDetails userDetails = userDetailsService.loadUserByUsername(name);
             String generateToken = jwtTokenProvider.generateToken(userDetails);
             HttpServletResponse httpServletResponse = (HttpServletResponse) res;
-            httpServletResponse.addHeader(AUTHORIZATION, "Bearer " + generateToken);
+
+            httpServletResponse.addHeader(AUTHORIZATION, BEARER_PREFIX + generateToken);
         }
         filterChain.doFilter(req, res);
     }

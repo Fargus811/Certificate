@@ -19,7 +19,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode
 public class GiftCertificateCreateDTO extends AbstractDTO {
 
     @SuppressWarnings("deprecation")
