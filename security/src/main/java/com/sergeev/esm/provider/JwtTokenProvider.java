@@ -1,6 +1,7 @@
 package com.sergeev.esm.provider;
 
 import com.sergeev.esm.exception.JwtAuthenticationException;
+import com.sergeev.esm.util.BearerTokenUtil;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -28,9 +29,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @EnableConfigurationProperties
 public class JwtTokenProvider {
 
-    private static final String BEARER = "Bearer ";
     private static final String EMPTY_LINE = "";
-    private static final int BEARER_HEADER_OFFSET = 7;
     private static final int CONVERT_TO_MILLIS = 1000;
 
     @Value("${jwt.secret}")
@@ -119,8 +118,8 @@ public class JwtTokenProvider {
      */
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader(AUTHORIZATION);
-        if (bearerToken != null && bearerToken.startsWith(BEARER)) {
-            return bearerToken.substring(BEARER_HEADER_OFFSET);
+        if (bearerToken != null && bearerToken.startsWith(BearerTokenUtil.BEARER_PREFIX)) {
+            return BearerTokenUtil.substringBearerHeader(bearerToken);
         }
         return null;
     }

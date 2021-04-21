@@ -84,45 +84,18 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public <T extends AbstractDTO> void update(T giftCertificateToUpdateDTO) {
+    public <T extends AbstractDTO>  GiftCertificateReturnDTO update(T giftCertificateToUpdateDTO) {
         GiftCertificate giftCertificateToUpdate = modelMapper.map(giftCertificateToUpdateDTO, GiftCertificate.class);
         Optional<GiftCertificate> giftCertificateOptional =
                 giftCertificateRepository.findById(giftCertificateToUpdate.getId());
         if (giftCertificateOptional.isPresent()) {
-            GiftCertificate resultCertificate = setNotNullFieldsToCertificate(giftCertificateOptional.get(),
-                    giftCertificateToUpdate);
-            giftCertificateRepository.save(resultCertificate);
+            giftCertificateToUpdate.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
+            return modelMapper.map(giftCertificateRepository.save(giftCertificateToUpdate),
+                    GiftCertificateReturnDTO.class);
         } else {
             throw new ResourceIdNotFoundException(new ObjectError(giftCertificateToUpdate.getId().toString(),
                     "Exception.certificateWithIdNotFound"));
         }
-    }
-
-    private GiftCertificate setNotNullFieldsToCertificate(GiftCertificate giftCertificateInDataBase,
-                                                          GiftCertificate giftCertificateFromRequest) {
-        if (Objects.nonNull(giftCertificateFromRequest.getName())) {
-            giftCertificateInDataBase.setName(giftCertificateFromRequest.getName());
-        }
-        if (Objects.nonNull(giftCertificateFromRequest.getDescription())) {
-            giftCertificateInDataBase.setDescription(giftCertificateFromRequest.getDescription());
-        }
-        if (Objects.nonNull(giftCertificateFromRequest.getPrice())) {
-            giftCertificateInDataBase.setPrice(giftCertificateFromRequest.getPrice());
-        }
-        if (Objects.nonNull(giftCertificateFromRequest.getDuration())) {
-            giftCertificateInDataBase.setDuration(giftCertificateFromRequest.getDuration());
-        }
-        if (!CollectionUtils.isEmpty(giftCertificateFromRequest.getTags())) {
-            Set<Tag> giftCertificateInDataBaseTags = giftCertificateInDataBase.getTags();
-            giftCertificateFromRequest.getTags().forEach(tag -> {
-                if (!giftCertificateInDataBaseTags.contains(tag)) {
-                    giftCertificateInDataBaseTags.add(tag);
-                }
-            });
-            giftCertificateInDataBase.setTags(giftCertificateInDataBaseTags);
-        }
-        giftCertificateInDataBase.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
-        return giftCertificateInDataBase;
     }
 
     @Override

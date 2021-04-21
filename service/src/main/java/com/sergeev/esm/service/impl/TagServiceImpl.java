@@ -42,14 +42,14 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public void update(AbstractDTO tagDTO) {
+    public TagDTO update(AbstractDTO tagDTO) {
         Tag tag = modelMapper.map(tagDTO, Tag.class);
         if (tagRepository.findByName(tag.getName()).isPresent()) {
             throw new ResourceFoundException(new ObjectError(tag.getName(),
                     "Exception.tagWithNameFound"));
         }
         this.findById(tag.getId());
-        tagRepository.save(tag);
+        return modelMapper.map(tagRepository.save(tag), TagDTO.class);
     }
 
     @Override

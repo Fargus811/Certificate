@@ -40,7 +40,7 @@ public interface BaseService<R extends AbstractDTO> {
      *
      * @param entity the entity
      */
-    <T extends AbstractDTO> void update(T entity);
+    <T extends AbstractDTO> R update(T entity);
 
     /**
      * Delete by entity by id.

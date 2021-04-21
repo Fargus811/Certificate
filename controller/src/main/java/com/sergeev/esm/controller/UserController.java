@@ -8,10 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.Max;
@@ -29,6 +32,17 @@ public class UserController {
     private final UserService userService;
     private final PagedResourcesAssembler pagedResourcesAssembler;
 
+    /**
+     * Options response entity shows all the ways to manipulate the resource.
+     *
+     * @return the response entity
+     */
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> options() {
+        return ResponseEntity.ok()
+                .allow(HttpMethod.GET, HttpMethod.OPTIONS)
+                .build();
+    }
     /**
      * Find all paged model.
      *

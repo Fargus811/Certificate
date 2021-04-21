@@ -6,10 +6,12 @@ import com.sergeev.esm.dto.UserDTO;
 import com.sergeev.esm.service.AuthenticationService;
 import com.sergeev.esm.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -24,6 +26,18 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final UserService userService;
+
+    /**
+     * Options response entity shows all the ways to manipulate the resource.
+     *
+     * @return the response entity
+     */
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> options() {
+        return ResponseEntity.ok()
+                .allow(HttpMethod.POST, HttpMethod.OPTIONS)
+                .build();
+    }
 
     @PostMapping("/login")
     public ResponseEntity<Map<Object, Object>> generate(@RequestBody AuthenticationRequest authenticationRequest) {

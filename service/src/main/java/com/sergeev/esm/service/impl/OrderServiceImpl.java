@@ -106,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void update(AbstractDTO entity) {
+    public OrderDTO update(AbstractDTO entity) {
         throw new UnsupportedOperationException();
     }
 

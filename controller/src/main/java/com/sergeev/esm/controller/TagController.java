@@ -5,10 +5,12 @@ import com.sergeev.esm.dto.TagDTO;
 import com.sergeev.esm.service.TagService;
 import com.sergeev.esm.util.HATEOASBuilder;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,6 +32,18 @@ public class TagController {
 
     private final TagService tagService;
     private final PagedResourcesAssembler pagedResourcesAssembler;
+
+    /**
+     * Options response entity shows all the ways to manipulate the resource.
+     *
+     * @return the response entity
+     */
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> options() {
+        return ResponseEntity.ok()
+                .allow(HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS, HttpMethod.PUT, HttpMethod.DELETE)
+                .build();
+    }
 
     /**
      * Find all paged model.
@@ -90,11 +104,12 @@ public class TagController {
      *
      * @param tagDTO the tag
      */
-    @PatchMapping
-    @ResponseStatus(HttpStatus.OK)
+    @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void updateTag(@Valid @RequestBody TagDTO tagDTO) {
-        tagService.update(tagDTO);
+    public ResponseEntity<TagDTO> updateTag(@Valid @RequestBody TagDTO tagDTO) {
+        TagDTO updatedTag = tagService.create(tagDTO);
+        HATEOASBuilder.addLinksToTag(updatedTag);
+        return ResponseEntity.ok(updatedTag);
     }
 
     /**

@@ -35,23 +35,6 @@ public class ControllerExceptionHandler {
     private final MessageSource messageSource;
 
     /**
-     * Handle illegal argument response entity.
-     *
-     * @param ex     the ex
-     * @param locale the locale
-     * @return the response entity
-     */
-    @ExceptionHandler(RestException.class)
-    public ResponseEntity<RestMessage> handleIllegalArgument(RestException ex, Locale locale) {
-        String reasonMessage = messageSource.getMessage(ex.getReason(), null, locale);
-        ObjectError objectError = ex.getDescription();
-        String errorMessage = messageSource.getMessage(objectError.getDefaultMessage(), null, locale);
-        String result = String.format(errorMessage, objectError.getObjectName());
-        return new ResponseEntity<>
-                (new RestMessage(reasonMessage, Collections.singletonList(result), ex.getErrorCode()), ex.getHttpStatus());
-    }
-
-    /**
      * Handle argument not valid exception response entity.
      *
      * @param ex     the ex
@@ -101,6 +84,23 @@ public class ControllerExceptionHandler {
         errorMessages.add(messageSource.getMessage(INVALID_ROLE, null, locale));
         return new ResponseEntity<>(new RestMessage(reasonMessage, errorMessages,
                 RestMessage.ERROR_CODE_FORBIDDEN), HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Handle illegal argument response entity.
+     *
+     * @param ex     the ex
+     * @param locale the locale
+     * @return the response entity
+     */
+    @ExceptionHandler(RestException.class)
+    public ResponseEntity<RestMessage> handleIllegalArgument(RestException ex, Locale locale) {
+        String reasonMessage = messageSource.getMessage(ex.getReason(), null, locale);
+        ObjectError objectError = ex.getDescription();
+        String errorMessage = messageSource.getMessage(objectError.getDefaultMessage(), null, locale);
+        String result = String.format(errorMessage, objectError.getObjectName());
+        return new ResponseEntity<>
+                (new RestMessage(reasonMessage, Collections.singletonList(result), ex.getErrorCode()), ex.getHttpStatus());
     }
 
     /**

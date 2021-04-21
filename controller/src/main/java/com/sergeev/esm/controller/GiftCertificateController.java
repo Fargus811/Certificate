@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +35,18 @@ public class GiftCertificateController {
 
     private final GiftCertificateService giftCertificateService;
     private final PagedResourcesAssembler pagedResourcesAssembler;
+
+    /**
+     * Options response entity shows all the ways to manipulate the resource.
+     *
+     * @return the response entity
+     */
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> options() {
+        return ResponseEntity.ok()
+                .allow(HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS, HttpMethod.PUT, HttpMethod.DELETE)
+                .build();
+    }
 
     /**
      * Find all by params paged model.
@@ -83,15 +96,16 @@ public class GiftCertificateController {
     }
 
     /**
-     * Update the giftCertificate.
+     * Update the giftCertificate. All fields should be not empty and satisfy the conditions of validation.
      *
      * @param giftCertificateUpdateDTO the gift certificate
      */
-    @PatchMapping
-    @ResponseStatus(HttpStatus.OK)
+    @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void update(@Valid @RequestBody GiftCertificateUpdateDTO giftCertificateUpdateDTO) {
-        giftCertificateService.update(giftCertificateUpdateDTO);
+    public ResponseEntity<GiftCertificateReturnDTO> update(@Valid @RequestBody GiftCertificateUpdateDTO giftCertificateUpdateDTO) {
+        GiftCertificateReturnDTO updatedCertificate = giftCertificateService.update(giftCertificateUpdateDTO);
+        HATEOASBuilder.addLinksToCertificate(updatedCertificate);
+        return ResponseEntity.ok(updatedCertificate);
     }
 
     /**

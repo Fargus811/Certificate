@@ -2,6 +2,7 @@ package com.sergeev.esm.filters;
 
 import com.sergeev.esm.exception.JwtAuthenticationException;
 import com.sergeev.esm.provider.JwtTokenProvider;
+import com.sergeev.esm.util.BearerTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,15 +25,13 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 
     private static final String USERNAME_REQUEST_ATTRIBUTE = "username";
     private static final String JWT_REQUEST_ATTRIBUTE = "jwt";
-    private static final int BEARER_HEADER_OFFSET = 7;
-    private static final String BEARER = "Bearer ";
 
     private final JwtTokenProvider jwtTokenProvider;
 
     private void validateJwt(HttpServletRequest request) {
-        final String requestTokenHeader = request.getHeader(AUTHORIZATION);
-        if (requestTokenHeader != null && requestTokenHeader.startsWith(BEARER)) {
-            String jwtToken = requestTokenHeader.substring(BEARER_HEADER_OFFSET);
+        String requestTokenHeader = request.getHeader(AUTHORIZATION);
+        if (requestTokenHeader != null && requestTokenHeader.startsWith(BearerTokenUtil.BEARER_PREFIX)) {
+            String jwtToken = BearerTokenUtil.substringBearerHeader(requestTokenHeader);
             try {
                 if (!jwtTokenProvider.validateToken(jwtTokenProvider.resolveToken(request))) {
                     throw new JwtAuthenticationException("JWT token is expired or invalid");
