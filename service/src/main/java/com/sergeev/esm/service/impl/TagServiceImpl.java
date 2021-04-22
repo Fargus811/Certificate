@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,45 +32,41 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public <T extends AbstractDTO> TagDTO create(T tagDTO) {
+    public <T extends AbstractDTO> TagDTO createOrUpdate(T tagDTO) {
         Tag tag = modelMapper.map(tagDTO, Tag.class);
-        if (tagRepository.findByName(tag.getName()).isPresent()) {
-            throw new ResourceFoundException(new ObjectError(tag.getName(),
-                    "Exception.tagWithNameFound"));
+        checkUniqTagName(tag.getName());
+        if (Objects.nonNull(tag.getId())){
+            this.findById(tag.getId());
         }
         return modelMapper.map(tagRepository.save(tag), TagDTO.class);
     }
 
-    @Override
-    @Transactional
-    public TagDTO update(AbstractDTO tagDTO) {
-        Tag tag = modelMapper.map(tagDTO, Tag.class);
-        if (tagRepository.findByName(tag.getName()).isPresent()) {
-            throw new ResourceFoundException(new ObjectError(tag.getName(),
+    private void checkUniqTagName(String tagName) {
+        if (tagRepository.findByName(tagName).isPresent()) {
+            throw new ResourceFoundException(new ObjectError(tagName,
                     "Exception.tagWithNameFound"));
         }
-        this.findById(tag.getId());
-        return modelMapper.map(tagRepository.save(tag), TagDTO.class);
     }
 
     @Override
     public void delete(Long id) {
         Optional<Tag> tagOptional = tagRepository.findById(id);
-        if (tagOptional.isEmpty()) {
-            throw new ResourceIdNotFoundException
-                    (new ObjectError(id.toString(), "Exception.tagWithIdNotFound"));
-        }
+        checkTagByIdInDB(id, tagOptional);
         tagRepository.deleteById(id);
     }
 
     @Override
     public TagDTO findById(Long id) {
         Optional<Tag> tagOptional = tagRepository.findById(id);
+        checkTagByIdInDB(id, tagOptional);
+        return modelMapper.map(tagOptional.get(), TagDTO.class);
+    }
+
+    private void checkTagByIdInDB(Long id, Optional<Tag> tagOptional) {
         if (tagOptional.isEmpty()) {
             throw new ResourceIdNotFoundException
                     (new ObjectError(id.toString(), "Exception.tagWithIdNotFound"));
         }
-        return modelMapper.map(tagOptional.get(), TagDTO.class);
     }
 
     @Override

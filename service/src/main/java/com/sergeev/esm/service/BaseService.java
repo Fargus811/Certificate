@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 public interface BaseService<R extends AbstractDTO> {
 
     /**
-     * Find by id t.
+     * Find entity by id.
      *
      * @param id the id
      * @return the t
@@ -20,7 +20,7 @@ public interface BaseService<R extends AbstractDTO> {
     R findById(Long id);
 
     /**
-     * Find all list.
+     * Find all entity list.
      *
      * @param pageable the page of request
      * @return the list
@@ -28,22 +28,15 @@ public interface BaseService<R extends AbstractDTO> {
     Page<R> findAll(Pageable pageable);
 
     /**
-     * Create t.
+     * Create or update entity.
      *
      * @param entity the entity
      * @return the t
      */
-    <T extends AbstractDTO> R create(T entity);
+    <T extends AbstractDTO> R createOrUpdate(T entity);
 
     /**
-     * Update.
-     *
-     * @param entity the entity
-     */
-    <T extends AbstractDTO> R update(T entity);
-
-    /**
-     * Delete by entity by id.
+     * Delete entity by id.
      *
      * @param id the id
      */

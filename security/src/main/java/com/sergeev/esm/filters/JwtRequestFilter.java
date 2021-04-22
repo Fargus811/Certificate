@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
@@ -41,18 +42,16 @@ public class JwtRequestFilter extends GenericFilterBean {
             throws IOException, ServletException {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) req);
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        if (token != null && jwtTokenProvider.validateToken(token)
-                && Objects.isNull(securityContext.getAuthentication())) {
+        if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             securityContext.setAuthentication(auth);
         } else if (Objects.nonNull(securityContext.getAuthentication()) &&
-                !(securityContext.getAuthentication() instanceof AnonymousAuthenticationToken)) {
+                (securityContext.getAuthentication() instanceof OAuth2AuthenticationToken)) {
             OidcUser principal = (OidcUser) securityContext.getAuthentication().getPrincipal();
             String name = principal.getAttribute(NAME_ATTRIBUTE);
             UserDetails userDetails = userDetailsService.loadUserByUsername(name);
             String generateToken = jwtTokenProvider.generateToken(userDetails);
             HttpServletResponse httpServletResponse = (HttpServletResponse) res;
-
             httpServletResponse.addHeader(AUTHORIZATION, BearerTokenUtil.BEARER_PREFIX + generateToken);
         }
         filterChain.doFilter(req, res);

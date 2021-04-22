@@ -5,7 +5,6 @@ import com.sergeev.esm.dto.TagDTO;
 import com.sergeev.esm.service.TagService;
 import com.sergeev.esm.util.HATEOASBuilder;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.constraints.SafeHtml;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -81,7 +80,7 @@ public class TagController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TagDTO> createTag(@Valid @RequestBody TagDTO tagDTO) {
-        TagDTO resultDTO = tagService.create(tagDTO);
+        TagDTO resultDTO = tagService.createOrUpdate(tagDTO);
         HATEOASBuilder.addLinksToTag(resultDTO);
         return ResponseEntity.ok(resultDTO);
     }
@@ -107,7 +106,7 @@ public class TagController {
     @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TagDTO> updateTag(@Valid @RequestBody TagDTO tagDTO) {
-        TagDTO updatedTag = tagService.create(tagDTO);
+        TagDTO updatedTag = tagService.createOrUpdate(tagDTO);
         HATEOASBuilder.addLinksToTag(updatedTag);
         return ResponseEntity.ok(updatedTag);
     }

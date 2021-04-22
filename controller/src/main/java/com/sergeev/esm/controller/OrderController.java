@@ -84,7 +84,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN, ROLE_USER')")
     public ResponseEntity<OrderDTO> create(@RequestBody CreateOrderDTO createOrderDTO) {
-        OrderDTO orderDTO = orderService.create(createOrderDTO);
+        OrderDTO orderDTO = orderService.createOrUpdate(createOrderDTO);
         HATEOASBuilder.addLinksToOrder(orderDTO);
         return ResponseEntity.of(Optional.of(orderDTO));
     }

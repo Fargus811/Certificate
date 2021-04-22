@@ -3,7 +3,6 @@ package com.sergeev.esm.service.impl;
 import com.sergeev.esm.dto.AbstractDTO;
 import com.sergeev.esm.dto.GiftCertificateReturnDTO;
 import com.sergeev.esm.entity.GiftCertificate;
-import com.sergeev.esm.entity.Tag;
 import com.sergeev.esm.exception.ResourceFoundException;
 import com.sergeev.esm.exception.ResourceIdNotFoundException;
 import com.sergeev.esm.repository.GiftCertificateRepository;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.validation.ObjectError;
 
 import java.time.LocalDateTime;
@@ -38,10 +36,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public GiftCertificateReturnDTO findById(Long id) {
         Optional<GiftCertificate> optionalGiftCertificate = giftCertificateRepository.findById(id);
-        if (optionalGiftCertificate.isPresent()) {
-            GiftCertificate giftCertificate = optionalGiftCertificate.get();
-            return modelMapper.map(giftCertificate, GiftCertificateReturnDTO.class);
-        } else {
+        checkGiftCertificateByIdInDB(id, optionalGiftCertificate);
+        return modelMapper.map(optionalGiftCertificate.get(), GiftCertificateReturnDTO.class);
+    }
+
+    private void checkGiftCertificateByIdInDB(Long id, Optional<GiftCertificate> optionalGiftCertificate) {
+        if (optionalGiftCertificate.isEmpty()) {
             throw new ResourceIdNotFoundException(
                     new ObjectError(id.toString(), "Exception.certificateWithIdNotFound"));
         }
@@ -62,17 +62,20 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public <T extends AbstractDTO> GiftCertificateReturnDTO create(T giftCertificateCreateDTO) {
+    public <T extends AbstractDTO> GiftCertificateReturnDTO createOrUpdate(T giftCertificateCreateDTO) {
         GiftCertificate giftCertificate = modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class);
-        String giftCertificateName = giftCertificate.getName();
+        checkGiftCertificateByName(giftCertificate.getName());
+        if (Objects.isNull(giftCertificate.getId())) {
+            giftCertificate.setCreateDate(LocalDateTime.now(ZoneId.systemDefault()));
+        }
+        giftCertificate.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
+        return modelMapper.map(giftCertificateRepository.save(giftCertificate), GiftCertificateReturnDTO.class);
+    }
+
+    private void checkGiftCertificateByName(String giftCertificateName) {
         if (giftCertificateRepository.findByName(giftCertificateName).isPresent()) {
             throw new ResourceFoundException(new ObjectError(giftCertificateName,
                     "Exception.certificateWithNameFound"));
-        } else {
-            giftCertificate.setCreateDate(LocalDateTime.now(ZoneId.systemDefault()));
-            giftCertificate.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
-            return modelMapper.map(giftCertificateRepository.save(giftCertificate),
-                    GiftCertificateReturnDTO.class);
         }
     }
 
@@ -84,29 +87,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     @Transactional
-    public <T extends AbstractDTO>  GiftCertificateReturnDTO update(T giftCertificateToUpdateDTO) {
-        GiftCertificate giftCertificateToUpdate = modelMapper.map(giftCertificateToUpdateDTO, GiftCertificate.class);
-        Optional<GiftCertificate> giftCertificateOptional =
-                giftCertificateRepository.findById(giftCertificateToUpdate.getId());
-        if (giftCertificateOptional.isPresent()) {
-            giftCertificateToUpdate.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
-            return modelMapper.map(giftCertificateRepository.save(giftCertificateToUpdate),
-                    GiftCertificateReturnDTO.class);
-        } else {
-            throw new ResourceIdNotFoundException(new ObjectError(giftCertificateToUpdate.getId().toString(),
+    public void delete(Long id) {
+        if (giftCertificateRepository.findById(id).isEmpty()) {
+            throw new ResourceIdNotFoundException(new ObjectError(id.toString(),
                     "Exception.certificateWithIdNotFound"));
         }
-    }
-
-    @Override
-    @Transactional
-    public void delete(Long id) {
-        if (giftCertificateRepository.findById(id).isPresent()) {
-            giftCertificateRepository.deleteById(id);
-        } else {
-            throw new ResourceIdNotFoundException
-                    (new ObjectError(id.toString(), "Exception.certificateWithIdNotFound"));
-        }
+        giftCertificateRepository.deleteById(id);
     }
 }
 

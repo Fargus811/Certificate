@@ -55,8 +55,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceIdNotFoundException(
                     new ObjectError(id.toString(), "Exception.userWithIdNotFound"));
         }
-        User user = userOptional.get();
-        return modelMapper.map(user, UserDTO.class);
+        return modelMapper.map(userOptional.get(), UserDTO.class);
     }
 
     @Override
@@ -71,15 +70,12 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceFoundException(new ObjectError(userForm.getUsername(),
                         "Exception.roleWithNameNotFound")));
 
-        Set<Role> userRoles = new HashSet<>();
-        userRoles.add(roleUser);
-
         User user = User.builder()
                 .email(userForm.getEmail())
                 .username(userForm.getUsername())
                 .firstName(userForm.getFirstName())
                 .lastName(userForm.getLastName())
-                .roles(userRoles)
+                .roles(Set.of(roleUser))
                 .password(bCryptPasswordEncoder.encode(userForm.getPassword()))
                 .build();
 

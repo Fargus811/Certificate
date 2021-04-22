@@ -41,13 +41,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO findById(Long id) {
         Optional<Order> optionalGiftCertificate = orderRepository.findById(id);
-        if (optionalGiftCertificate.isPresent()) {
-            Order order = optionalGiftCertificate.get();
-            return modelMapper.map(order, OrderDTO.class);
-        } else {
+        if (optionalGiftCertificate.isEmpty()) {
             throw new ResourceIdNotFoundException(
                     new ObjectError(id.toString(), "Exception.orderWithIdNotFound"));
         }
+        return modelMapper.map(optionalGiftCertificate.get(), OrderDTO.class);
     }
 
     @Override
@@ -68,46 +66,40 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO create(AbstractDTO createOrderRequest) {
+    public OrderDTO createOrUpdate(AbstractDTO createOrderRequest) {
         CreateOrderDTO createOrderDTO = (CreateOrderDTO) createOrderRequest;
         long userId = createOrderDTO.getUserId();
         Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isPresent()) {
-            User userOfOrder = userOptional.get();
-            List<GiftCertificate> giftCertificateList = new ArrayList<>();
-            BigDecimal price = countTotalPrice(createOrderDTO, giftCertificateList);
-            Order order = Order.builder()
-                    .user(userOfOrder)
-                    .giftCertificateList(giftCertificateList)
-                    .orderDate(LocalDateTime.now())
-                    .price(price)
-                    .build();
-            return modelMapper.map(orderRepository.save(order), OrderDTO.class);
-        } else {
+        if (userOptional.isEmpty()) {
             throw new ResourceIdNotFoundException(
                     new ObjectError(userOptional.toString(), "Exception.userWithIdNotFound"));
         }
+        User userOfOrder = userOptional.get();
+        List<GiftCertificate> giftCertificateList = new ArrayList<>();
+        BigDecimal price = countTotalPrice(createOrderDTO, giftCertificateList);
+        Order order = Order.builder()
+                .user(userOfOrder)
+                .giftCertificateList(giftCertificateList)
+                .orderDate(LocalDateTime.now())
+                .price(price)
+                .build();
+        return modelMapper.map(orderRepository.save(order), OrderDTO.class);
+
     }
 
     private BigDecimal countTotalPrice(CreateOrderDTO createOrderDTO, List<GiftCertificate> giftCertificateList) {
         BigDecimal price = BigDecimal.ZERO;
         for (Long giftId : createOrderDTO.getGiftCertificateIdList()) {
             Optional<GiftCertificate> giftCertificateOptional = giftCertificateRepository.findById(giftId);
-            if (giftCertificateOptional.isPresent()) {
-                GiftCertificate giftCertificate = giftCertificateOptional.get();
-                price = price.add(giftCertificate.getPrice());
-                giftCertificateList.add(giftCertificate);
-            } else {
+            if (giftCertificateOptional.isEmpty()) {
                 throw new ResourceIdNotFoundException(
                         new ObjectError(giftId.toString(), "Exception.certificateWithIdNotFound"));
             }
+            GiftCertificate giftCertificate = giftCertificateOptional.get();
+            price = price.add(giftCertificate.getPrice());
+            giftCertificateList.add(giftCertificate);
         }
         return price;
-    }
-
-    @Override
-    public OrderDTO update(AbstractDTO entity) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
