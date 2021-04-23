@@ -2,6 +2,9 @@ dependencies {
     implementation group: 'org.modelmapper', name: 'modelmapper', version: '2.1.1'
     implementation project(':repository')
     compile group: 'org.springframework', name: 'spring-tx', version: '5.3.5'
+    implementation 'org.mapstruct:mapstruct:1.4.2.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
 }
 
 test {

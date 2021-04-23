@@ -4,11 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -39,11 +43,11 @@ public class GiftCertificate {
     private BigDecimal price;
     @Column(name = "duration", nullable = false)
     private Integer duration;
-    @Column(name = "createDate", updatable = false, nullable = false)
-    @CreatedDate
+    @Column(name = "create_date", updatable = false , nullable = false)
+    @CreationTimestamp
     private LocalDateTime createDate;
-    @Column(nullable = false)
-    @LastModifiedDate
+    @Column(name = "last_update_date", nullable = false)
+    @UpdateTimestamp
     private LocalDateTime lastUpdateDate;
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinTable(name = "gift_tags",

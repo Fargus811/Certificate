@@ -1,12 +1,15 @@
 package com.sergeev.esm.service.impl;
 
 import com.sergeev.esm.dto.AbstractDTO;
+import com.sergeev.esm.dto.GiftCertificateCreateDTO;
 import com.sergeev.esm.dto.GiftCertificateReturnDTO;
+import com.sergeev.esm.dto.GiftCertificateUpdateDTO;
 import com.sergeev.esm.entity.GiftCertificate;
 import com.sergeev.esm.exception.ResourceFoundException;
 import com.sergeev.esm.exception.ResourceIdNotFoundException;
 import com.sergeev.esm.repository.GiftCertificateRepository;
 import com.sergeev.esm.service.GiftCertificateService;
+import com.sergeev.esm.util.GiftCertificateMapper;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -16,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.ObjectError;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +33,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateRepository giftCertificateRepository;
     private final ModelMapper modelMapper;
+    private final GiftCertificateMapper giftCertificateMapper;
 
     @Override
     public GiftCertificateReturnDTO findById(Long id) {
@@ -61,15 +63,32 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    @Transactional
     public <T extends AbstractDTO> GiftCertificateReturnDTO createOrUpdate(T giftCertificateCreateDTO) {
         GiftCertificate giftCertificate = modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class);
-        checkGiftCertificateByName(giftCertificate.getName());
-        if (Objects.isNull(giftCertificate.getId())) {
-            giftCertificate.setCreateDate(LocalDateTime.now(ZoneId.systemDefault()));
+        GiftCertificate resultToSave;
+        if (Objects.nonNull(giftCertificate.getId())) {
+            Long giftCertificateIdToUpdate = giftCertificate.getId();
+            checkIfNameUniqBesidesThisCertificate(giftCertificate.getName(), giftCertificate.getId());
+            Optional<GiftCertificate> certificateFromDB = giftCertificateRepository.findById(giftCertificateIdToUpdate);
+            checkGiftCertificateByIdInDB(giftCertificateIdToUpdate, certificateFromDB);
+            resultToSave = certificateFromDB.get();
+            giftCertificateMapper.updateGiftCertificateFromDto(
+                    (GiftCertificateUpdateDTO) giftCertificateCreateDTO, resultToSave);
+        } else {
+            checkGiftCertificateByName(giftCertificate.getName());
+            resultToSave = giftCertificate;
         }
-        giftCertificate.setLastUpdateDate(LocalDateTime.now(ZoneId.systemDefault()));
-        return modelMapper.map(giftCertificateRepository.save(giftCertificate), GiftCertificateReturnDTO.class);
+        GiftCertificate resultCertificate = giftCertificateRepository.save(resultToSave);
+        return modelMapper.map(resultCertificate, GiftCertificateReturnDTO.class);
+    }
+
+    private void checkIfNameUniqBesidesThisCertificate(String giftCertificateNameToUpdate, Long idToUpdate) {
+        Optional<GiftCertificate> certificateFromDB = giftCertificateRepository.findByName(giftCertificateNameToUpdate);
+        if (certificateFromDB.isPresent() && !(certificateFromDB.get().getId().equals(idToUpdate))) {
+            throw new ResourceFoundException(new ObjectError(giftCertificateNameToUpdate,
+                    "Exception.certificateWithNameFound"));
+        }
+
     }
 
     private void checkGiftCertificateByName(String giftCertificateName) {
