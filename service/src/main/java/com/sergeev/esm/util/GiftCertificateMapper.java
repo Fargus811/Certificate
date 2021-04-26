@@ -1,6 +1,5 @@
 package com.sergeev.esm.util;
 
-import com.sergeev.esm.dto.GiftCertificateCreateDTO;
 import com.sergeev.esm.dto.GiftCertificateUpdateDTO;
 import com.sergeev.esm.entity.GiftCertificate;
 import org.mapstruct.BeanMapping;
@@ -12,6 +11,6 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface GiftCertificateMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateGiftCertificateFromDto(GiftCertificateUpdateDTO giftCertificateCreateDTO,
+    void updateGiftCertificateFromDto(GiftCertificateUpdateDTO giftCertificateUpdateDTO,
                                       @MappingTarget GiftCertificate giftCertificate);
 }

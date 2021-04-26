@@ -58,13 +58,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private PageImpl<GiftCertificateReturnDTO> getGiftReturnDTOS(Pageable pageable,
                                                                  Page<GiftCertificate> giftCertificatePage) {
         return new PageImpl<>(giftCertificatePage.get()
-                .map(order -> modelMapper.map(order, GiftCertificateReturnDTO.class))
+                .map(giftCertificate -> modelMapper.map(giftCertificate, GiftCertificateReturnDTO.class))
                 .collect(Collectors.toList()), pageable, giftCertificatePage.getTotalElements());
     }
 
     @Override
-    public <T extends AbstractDTO> GiftCertificateReturnDTO createOrUpdate(T giftCertificateCreateDTO) {
-        GiftCertificate giftCertificate = modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class);
+    public <T extends AbstractDTO> GiftCertificateReturnDTO createOrUpdate(T giftCertificateCreateOrUpdateDTO) {
+        GiftCertificate giftCertificate = modelMapper.map(giftCertificateCreateOrUpdateDTO, GiftCertificate.class);
         GiftCertificate resultToSave;
         if (Objects.nonNull(giftCertificate.getId())) {
             Long giftCertificateIdToUpdate = giftCertificate.getId();
@@ -73,7 +73,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             checkGiftCertificateByIdInDB(giftCertificateIdToUpdate, certificateFromDB);
             resultToSave = certificateFromDB.get();
             giftCertificateMapper.updateGiftCertificateFromDto(
-                    (GiftCertificateUpdateDTO) giftCertificateCreateDTO, resultToSave);
+                    (GiftCertificateUpdateDTO) giftCertificateCreateOrUpdateDTO, resultToSave);
         } else {
             checkGiftCertificateByName(giftCertificate.getName());
             resultToSave = giftCertificate;
@@ -107,10 +107,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     @Transactional
     public void delete(Long id) {
-        if (giftCertificateRepository.findById(id).isEmpty()) {
-            throw new ResourceIdNotFoundException(new ObjectError(id.toString(),
-                    "Exception.certificateWithIdNotFound"));
-        }
+        Optional<GiftCertificate> giftCertificateFromDB = giftCertificateRepository.findById(id);
+        checkGiftCertificateByIdInDB(id, giftCertificateFromDB);
         giftCertificateRepository.deleteById(id);
     }
 }
