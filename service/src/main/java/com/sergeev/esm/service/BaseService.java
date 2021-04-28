@@ -33,7 +33,7 @@ public interface BaseService<R extends AbstractDTO> {
      * @param entity the entity
      * @return the t
      */
-    <T extends AbstractDTO> R createOrUpdate(T entity);
+    <T extends AbstractDTO> R upsert(T entity);
 
     /**
      * Delete entity by id.

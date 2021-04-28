@@ -90,7 +90,7 @@ public class GiftCertificateController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<GiftCertificateReturnDTO> create(
             @Valid @RequestBody GiftCertificateCreateDTO giftCertificateCreateDTO) {
-        GiftCertificateReturnDTO giftCertificateReturnDTO = giftCertificateService.createOrUpdate(giftCertificateCreateDTO);
+        GiftCertificateReturnDTO giftCertificateReturnDTO = giftCertificateService.upsert(giftCertificateCreateDTO);
         HATEOASBuilder.addLinksToCertificate(giftCertificateReturnDTO);
         return ResponseEntity.of(Optional.of(giftCertificateReturnDTO));
     }
@@ -103,7 +103,7 @@ public class GiftCertificateController {
     @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<GiftCertificateReturnDTO> update(@Valid @RequestBody GiftCertificateUpdateDTO giftCertificateUpdateDTO) {
-        GiftCertificateReturnDTO updatedCertificate = giftCertificateService.createOrUpdate(giftCertificateUpdateDTO);
+        GiftCertificateReturnDTO updatedCertificate = giftCertificateService.upsert(giftCertificateUpdateDTO);
         HATEOASBuilder.addLinksToCertificate(updatedCertificate);
         return ResponseEntity.ok(updatedCertificate);
     }

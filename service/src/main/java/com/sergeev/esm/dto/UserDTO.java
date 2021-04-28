@@ -20,6 +20,7 @@ import java.util.List;
 public class UserDTO extends AbstractDTO {
 
     private Long id;
+    private String email;
     private String username;
     private String firstName;
     private String lastName;

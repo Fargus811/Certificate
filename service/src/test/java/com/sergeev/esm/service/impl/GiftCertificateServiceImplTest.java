@@ -26,9 +26,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 class GiftCertificateServiceImplTest {
 
@@ -62,25 +69,28 @@ class GiftCertificateServiceImplTest {
                 .name("testing")
                 .description("description")
                 .build();
-        //when
-        Mockito.when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
-        Mockito.when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
-        //then
-        Assertions.assertEquals(giftCertificateReturnDTO, giftCertificateService.findById(1L));
 
-        verify(giftCertificateRepository, times(1)).findById(1L);
+        //when
+        when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
+        when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
+
+        //then
+        assertEquals(giftCertificateReturnDTO, giftCertificateService.findById(1L));
+        verify(giftCertificateRepository, atLeastOnce()).findById(1L);
         verify(modelMapper, times(1)).map(giftCertificateFromDB, GiftCertificateReturnDTO.class);
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
     }
 
     @Test
     void findByWrongIdThrowsResourceIdNotFoundExceptionTest() {
-        //when
-        Mockito.when(giftCertificateRepository.findById(10000000L)).thenReturn(Optional.empty());
-        //then
-        Assertions.assertThrows(ResourceIdNotFoundException.class, ()->
-                giftCertificateService.findById(10000000L));
+        //given & when
+        when(giftCertificateRepository.findById(10000000L)).thenReturn(Optional.empty());
 
+        //then
+        assertThrows(ResourceIdNotFoundException.class, () ->
+                giftCertificateService.findById(10000000L));
         verify(giftCertificateRepository, times(1)).findById(10000000L);
+        verifyNoMoreInteractions(giftCertificateRepository);
     }
 
     @Test
@@ -99,49 +109,20 @@ class GiftCertificateServiceImplTest {
                 .build();
 
         PageImpl<GiftCertificateReturnDTO> giftCertificateReturnDTOPage = new PageImpl<>(List.of(giftCertificateReturnDTO));
-        //when
-        Mockito.when(giftCertificateRepository.findAll(Pageable.unpaged())).thenReturn(new PageImpl<>(List.of(giftCertificateFromDB)));
-        Mockito.when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
-        //then
-        Assertions.assertEquals(giftCertificateReturnDTOPage, giftCertificateService.findAll(Pageable.unpaged()));
 
+        //when
+        when(giftCertificateRepository.findAll(Pageable.unpaged())).thenReturn(new PageImpl<>(List.of(giftCertificateFromDB)));
+        when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
+
+        //then
+        assertEquals(giftCertificateReturnDTOPage, giftCertificateService.findAll(Pageable.unpaged()));
         verify(giftCertificateRepository, times(1)).findAll(Pageable.unpaged());
         verify(modelMapper, times(1)).map(giftCertificateFromDB, GiftCertificateReturnDTO.class);
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
     }
 
     @Test
     void createGiftCertificateTest() {
-        GiftCertificateCreateDTO giftCertificateCreateDTO = GiftCertificateCreateDTO.builder()
-                .name("testing")
-                .description("description")
-                .build();
-
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .name("testing")
-                .description("description")
-                .build();
-
-        GiftCertificateReturnDTO giftCertificateReturnDTO = GiftCertificateReturnDTO.builder()
-                .name("testing")
-                .description("description")
-                .build();
-
-        Mockito.when(modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class)).thenReturn(giftCertificate);
-        Mockito.when(giftCertificateRepository.findByName(any(String.class))).thenReturn(Optional.empty());
-        Mockito.when(giftCertificateRepository.save(giftCertificate)).thenReturn(giftCertificate);
-        Mockito.when(modelMapper.map(giftCertificate, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
-
-        GiftCertificateReturnDTO savedGiftCertificate = giftCertificateService.createOrUpdate(giftCertificateCreateDTO);
-        Assertions.assertEquals(giftCertificateReturnDTO, savedGiftCertificate);
-
-        verify(giftCertificateRepository, times(1)).findByName(giftCertificate.getName());
-        verify(giftCertificateRepository, times(1)).save(giftCertificate);
-        verify(modelMapper, times(1)).map(giftCertificateCreateDTO, GiftCertificate.class);
-        verify(modelMapper, times(1)).map(giftCertificate, GiftCertificateReturnDTO.class);
-    }
-
-    @Test
-    void createGiftCertificateWithSameNameTest() {
         //given
         GiftCertificateCreateDTO giftCertificateCreateDTO = GiftCertificateCreateDTO.builder()
                 .name("testing")
@@ -157,15 +138,46 @@ class GiftCertificateServiceImplTest {
                 .name("testing")
                 .description("description")
                 .build();
-        //when
-        Mockito.when(modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class)).thenReturn(giftCertificate);
-        Mockito.when(giftCertificateRepository.findByName(any(String.class))).thenReturn(Optional.of(giftCertificate));
-        //then
-        Assertions.assertThrows(ResourceFoundException.class, ()->
-                giftCertificateService.createOrUpdate(giftCertificateCreateDTO));
 
+        //when
+        when(modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class)).thenReturn(giftCertificate);
+        when(giftCertificateRepository.findByName(any(String.class))).thenReturn(Optional.empty());
+        when(giftCertificateRepository.save(giftCertificate)).thenReturn(giftCertificate);
+        when(modelMapper.map(giftCertificate, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
+
+        //then
+        GiftCertificateReturnDTO savedGiftCertificate = giftCertificateService.upsert(giftCertificateCreateDTO);
+        assertEquals(giftCertificateReturnDTO, savedGiftCertificate);
+        verify(giftCertificateRepository, times(1)).findByName(giftCertificate.getName());
+        verify(giftCertificateRepository, times(1)).save(giftCertificate);
+        verify(modelMapper, times(1)).map(giftCertificateCreateDTO, GiftCertificate.class);
+        verify(modelMapper, times(1)).map(giftCertificate, GiftCertificateReturnDTO.class);
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
+    }
+
+    @Test
+    void createGiftCertificateWithSameNameTest() {
+        //given
+        GiftCertificateCreateDTO giftCertificateCreateDTO = GiftCertificateCreateDTO.builder()
+                .name("testing")
+                .description("description")
+                .build();
+
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .name("testing")
+                .description("description")
+                .build();
+
+        //when
+        when(modelMapper.map(giftCertificateCreateDTO, GiftCertificate.class)).thenReturn(giftCertificate);
+        when(giftCertificateRepository.findByName(any(String.class))).thenReturn(Optional.of(giftCertificate));
+
+        //then
+        assertThrows(ResourceFoundException.class, () ->
+                giftCertificateService.upsert(giftCertificateCreateDTO));
         verify(giftCertificateRepository, times(1)).findByName(giftCertificate.getName());
         verify(modelMapper, times(1)).map(giftCertificateCreateDTO, GiftCertificate.class);
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
     }
 
     @Test
@@ -198,17 +210,18 @@ class GiftCertificateServiceImplTest {
                 .price(BigDecimal.valueOf(200.00))
                 .duration(91)
                 .build();
-        //when
-        Mockito.when(modelMapper.map(giftCertificateUpdateDTO, GiftCertificate.class)).thenReturn(giftCertificateToUpdate);
-        Mockito.when(giftCertificateRepository.findByName(giftCertificateToUpdate.getName()))
-                .thenReturn(Optional.of(giftCertificateFromDB));
-        Mockito.when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
-        Mockito.when(giftCertificateRepository.save(giftCertificateFromDB)).thenReturn(giftCertificateFromDB);
-        Mockito.when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
-        //then
-        GiftCertificateReturnDTO savedGiftCertificate = giftCertificateService.createOrUpdate(giftCertificateUpdateDTO);
-        Assertions.assertEquals(giftCertificateReturnDTO, savedGiftCertificate);
 
+        //when
+        when(modelMapper.map(giftCertificateUpdateDTO, GiftCertificate.class)).thenReturn(giftCertificateToUpdate);
+        when(giftCertificateRepository.findByName(giftCertificateToUpdate.getName()))
+                .thenReturn(Optional.of(giftCertificateFromDB));
+        when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
+        when(giftCertificateRepository.save(giftCertificateFromDB)).thenReturn(giftCertificateFromDB);
+        when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
+
+        //then
+        GiftCertificateReturnDTO savedGiftCertificate = giftCertificateService.upsert(giftCertificateUpdateDTO);
+        assertEquals(giftCertificateReturnDTO, savedGiftCertificate);
         verify(giftCertificateRepository, times(1)).findByName(giftCertificateFromDB.getName());
         verify(giftCertificateRepository, times(1)).findById(giftCertificateToUpdate.getId());
         verify(giftCertificateRepository, times(1)).save(giftCertificateFromDB);
@@ -216,6 +229,7 @@ class GiftCertificateServiceImplTest {
         verify(modelMapper, times(1)).map(giftCertificateFromDB, GiftCertificateReturnDTO.class);
         verify(giftCertificateMapper, times(1)).updateGiftCertificateFromDto(giftCertificateUpdateDTO,
                 giftCertificateFromDB);
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper, giftCertificateMapper);
     }
 
     @Test
@@ -248,20 +262,21 @@ class GiftCertificateServiceImplTest {
                 .price(BigDecimal.valueOf(200.00))
                 .duration(91)
                 .build();
-        //when
-        Mockito.when(modelMapper.map(giftCertificateUpdateDTO, GiftCertificate.class)).thenReturn(giftCertificateToUpdate);
-        Mockito.when(giftCertificateRepository.findByName(giftCertificateToUpdate.getName()))
-                .thenReturn(Optional.of(giftCertificateFromDB));
-        Mockito.when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
-        Mockito.when(giftCertificateRepository.save(giftCertificateFromDB)).thenReturn(giftCertificateFromDB);
-        Mockito.when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
-        //then
-        Assertions.assertThrows(ResourceFoundException.class, ()->
-                giftCertificateService.createOrUpdate(giftCertificateUpdateDTO));
 
+        //when
+        when(modelMapper.map(giftCertificateUpdateDTO, GiftCertificate.class)).thenReturn(giftCertificateToUpdate);
+        when(giftCertificateRepository.findByName(giftCertificateToUpdate.getName()))
+                .thenReturn(Optional.of(giftCertificateFromDB));
+        when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
+        when(giftCertificateRepository.save(giftCertificateFromDB)).thenReturn(giftCertificateFromDB);
+        when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class)).thenReturn(giftCertificateReturnDTO);
+
+        //then
+        assertThrows(ResourceFoundException.class, () ->
+                giftCertificateService.upsert(giftCertificateUpdateDTO));
         verify(giftCertificateRepository, times(1)).findByName(giftCertificateFromDB.getName());
         verify(modelMapper, times(1)).map(giftCertificateUpdateDTO, GiftCertificate.class);
-
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
     }
 
     @Test
@@ -280,18 +295,20 @@ class GiftCertificateServiceImplTest {
                 .build();
 
         //when
-        Mockito.when(modelMapper.map(giftCertificateUpdateDTO, GiftCertificate.class)).thenReturn(giftCertificateToUpdate);
-        Mockito.when(giftCertificateRepository.findByName(giftCertificateToUpdate.getName()))
+        when(modelMapper.map(giftCertificateUpdateDTO, GiftCertificate.class)).thenReturn(giftCertificateToUpdate);
+        when(giftCertificateRepository.findByName(giftCertificateToUpdate.getName()))
                 .thenReturn(Optional.empty());
-        Mockito.when(giftCertificateRepository.findById(1000000000L)).thenReturn(Optional.empty());
+        when(giftCertificateRepository.findById(1000000000L)).thenReturn(Optional.empty());
+
         //then
-        Assertions.assertThrows(ResourceIdNotFoundException.class, ()->
-                giftCertificateService.createOrUpdate(giftCertificateUpdateDTO));
-
+        assertThrows(ResourceIdNotFoundException.class, () ->
+                giftCertificateService.upsert(giftCertificateUpdateDTO));
         verify(giftCertificateRepository, times(1)).findByName(giftCertificateToUpdate.getName());
+        verify(giftCertificateRepository, times(1)).findById(giftCertificateToUpdate.getId());
         verify(modelMapper, times(1)).map(giftCertificateUpdateDTO, GiftCertificate.class);
-
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
     }
+
     @Test
     void findAllByTagNamesTest() {
         //given
@@ -314,17 +331,19 @@ class GiftCertificateServiceImplTest {
 
         PageImpl<GiftCertificateReturnDTO> giftCertificateReturnDTOPage =
                 new PageImpl<>(List.of(giftCertificateReturnDTO));
-        //when
-        Mockito.when(giftCertificateRepository.findAllByTagNames(tagNames, Pageable.unpaged()))
-                .thenReturn(new PageImpl<>(List.of(giftCertificateFromDB)));
-        Mockito.when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class))
-                .thenReturn(giftCertificateReturnDTO);
-        //then
-        Assertions.assertEquals(giftCertificateReturnDTOPage,
-                giftCertificateService.findAllByTagNames(tagNames,Pageable.unpaged()));
 
+        //when
+        when(giftCertificateRepository.findAllByTagNames(tagNames, Pageable.unpaged()))
+                .thenReturn(new PageImpl<>(List.of(giftCertificateFromDB)));
+        when(modelMapper.map(giftCertificateFromDB, GiftCertificateReturnDTO.class))
+                .thenReturn(giftCertificateReturnDTO);
+
+        //then
+        assertEquals(giftCertificateReturnDTOPage,
+                giftCertificateService.findAllByTagNames(tagNames, Pageable.unpaged()));
         verify(giftCertificateRepository, times(1)).findAllByTagNames(tagNames, Pageable.unpaged());
         verify(modelMapper, times(1)).map(giftCertificateFromDB, GiftCertificateReturnDTO.class);
+        verifyNoMoreInteractions(giftCertificateRepository, modelMapper);
     }
 
     @Test
@@ -335,22 +354,29 @@ class GiftCertificateServiceImplTest {
                 .name("testing")
                 .description("description")
                 .build();
+
         //when
-        Mockito.when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
-        Mockito.doNothing().when(giftCertificateRepository).deleteById(1L);
+        when(giftCertificateRepository.findById(1L)).thenReturn(Optional.of(giftCertificateFromDB));
+        doNothing().when(giftCertificateRepository).deleteById(1L);
+
         //then
         giftCertificateService.delete(1L);
         verify(giftCertificateRepository, times(1)).deleteById(1L);
+        verify(giftCertificateRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(giftCertificateRepository);
     }
 
     @Test
     void deleteThrowResourceIdNotFoundExceptionTest() {
-        //when
-        Mockito.when(giftCertificateRepository.findById(1L)).thenReturn(Optional.empty());
-        Mockito.doNothing().when(giftCertificateRepository).deleteById(1L);
+        //given & when
+        when(giftCertificateRepository.findById(1L)).thenReturn(Optional.empty());
+        doNothing().when(giftCertificateRepository).deleteById(1L);
+
         //then
-        Assertions.assertThrows(ResourceIdNotFoundException.class, () -> {
+        assertThrows(ResourceIdNotFoundException.class, () -> {
             giftCertificateService.delete(1L);
         });
+        verify(giftCertificateRepository, times(1)).findById(1L);
+        verifyNoMoreInteractions(giftCertificateRepository);
     }
 }

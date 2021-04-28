@@ -13,6 +13,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -29,7 +30,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @AllArgsConstructor
 @NoArgsConstructor
 @Audited(targetAuditMode = NOT_AUDITED)
-public class GiftCertificate {
+public class GiftCertificate implements Serializable {
 
     @Id
     @Column(name = "id")

@@ -49,7 +49,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> findOrdersByUserID(Long userId, Pageable pageable) {
+    public Page<OrderDTO> findOrdersByUserId(Long userId, Pageable pageable) {
+        findUserById(userId);
         Page<Order> orderPage = orderRepository.findByUserId(userId, pageable);
         return getOrderDTOS(pageable, orderPage);
     }
@@ -66,25 +67,27 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO createOrUpdate(AbstractDTO createOrderRequest) {
+    public OrderDTO upsert(AbstractDTO createOrderRequest) {
         CreateOrderDTO createOrderDTO = (CreateOrderDTO) createOrderRequest;
         long userId = createOrderDTO.getUserId();
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new ResourceIdNotFoundException(
-                    new ObjectError(userOptional.toString(), "Exception.userWithIdNotFound"));
-        }
-        User userOfOrder = userOptional.get();
+        User userOfOrder = findUserById(userId);
         List<GiftCertificate> giftCertificateList = new ArrayList<>();
         BigDecimal price = countTotalPrice(createOrderDTO, giftCertificateList);
         Order order = Order.builder()
                 .user(userOfOrder)
                 .giftCertificateList(giftCertificateList)
-                .orderDate(LocalDateTime.now())
                 .price(price)
                 .build();
         return modelMapper.map(orderRepository.save(order), OrderDTO.class);
+    }
 
+    private User findUserById(long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new ResourceIdNotFoundException(
+                    new ObjectError(userOptional.toString(), "Exception.userWithIdNotFound"));
+        }
+        return userOptional.get();
     }
 
     private BigDecimal countTotalPrice(CreateOrderDTO createOrderDTO, List<GiftCertificate> giftCertificateList) {

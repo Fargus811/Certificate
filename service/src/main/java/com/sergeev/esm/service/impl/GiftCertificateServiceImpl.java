@@ -63,9 +63,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public <T extends AbstractDTO> GiftCertificateReturnDTO createOrUpdate(T giftCertificateCreateOrUpdateDTO) {
+    public <T extends AbstractDTO> GiftCertificateReturnDTO upsert(T giftCertificateCreateOrUpdateDTO) {
         GiftCertificate giftCertificate = modelMapper.map(giftCertificateCreateOrUpdateDTO, GiftCertificate.class);
         GiftCertificate resultToSave;
+
         if (Objects.nonNull(giftCertificate.getId())) {
             Long giftCertificateIdToUpdate = giftCertificate.getId();
             checkIfNameUniqBesidesThisCertificate(giftCertificate.getName(), giftCertificate.getId());
@@ -78,6 +79,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             checkGiftCertificateByName(giftCertificate.getName());
             resultToSave = giftCertificate;
         }
+
         GiftCertificate resultCertificate = giftCertificateRepository.save(resultToSave);
         return modelMapper.map(resultCertificate, GiftCertificateReturnDTO.class);
     }
@@ -88,7 +90,6 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             throw new ResourceFoundException(new ObjectError(giftCertificateNameToUpdate,
                     "Exception.certificateWithNameFound"));
         }
-
     }
 
     private void checkGiftCertificateByName(String giftCertificateName) {

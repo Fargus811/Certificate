@@ -2,6 +2,7 @@ package com.sergeev.esm.service.impl;
 
 import com.sergeev.esm.dto.AbstractDTO;
 import com.sergeev.esm.dto.TagDTO;
+import com.sergeev.esm.entity.GiftCertificate;
 import com.sergeev.esm.entity.Tag;
 import com.sergeev.esm.exception.ResourceFoundException;
 import com.sergeev.esm.exception.ResourceIdNotFoundException;
@@ -32,18 +33,29 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional
-    public <T extends AbstractDTO> TagDTO createOrUpdate(T tagDTO) {
+    public <T extends AbstractDTO> TagDTO upsert(T tagDTO) {
         Tag tag = modelMapper.map(tagDTO, Tag.class);
-        checkUniqTagName(tag.getName());
+        String tagNameToUpdate = tag.getName();
+
         if (Objects.nonNull(tag.getId())){
-            this.findById(tag.getId());
+            checkIfNameUniqBesidesThisCertificate(tagNameToUpdate,tag.getId());
+        }else {
+            checkUniqTagName(tagNameToUpdate);
         }
+
         return modelMapper.map(tagRepository.save(tag), TagDTO.class);
     }
 
     private void checkUniqTagName(String tagName) {
         if (tagRepository.findByName(tagName).isPresent()) {
             throw new ResourceFoundException(new ObjectError(tagName,
+                    "Exception.tagWithNameFound"));
+        }
+    }
+    private void checkIfNameUniqBesidesThisCertificate(String tagNameToUpdate, Long idToUpdate) {
+        Optional<Tag> tagOptional = tagRepository.findByName(tagNameToUpdate);
+        if (tagOptional.isPresent() && !(tagOptional.get().getId().equals(idToUpdate))) {
+            throw new ResourceFoundException(new ObjectError(tagNameToUpdate,
                     "Exception.tagWithNameFound"));
         }
     }
@@ -85,7 +97,7 @@ public class TagServiceImpl implements TagService {
         Optional<Tag> usersMostWidelyUsedTag = tagRepository.findUsersMostWidelyUsedTag();
         if (usersMostWidelyUsedTag.isEmpty()) {
             throw new ResourceIdNotFoundException
-                    (new ObjectError(usersMostWidelyUsedTag.toString(), "Exception.tagNotFound"));
+                    (new ObjectError("Exception.notFoundMostWidelyUsedTag", "Exception.tagNotFound"));
         }
         return modelMapper.map(usersMostWidelyUsedTag.get(), TagDTO.class);
     }

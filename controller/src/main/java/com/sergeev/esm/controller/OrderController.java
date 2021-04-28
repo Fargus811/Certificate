@@ -56,7 +56,7 @@ public class OrderController {
     public PagedModel<OrderDTO> findOrders(@RequestParam(required = false) @Min(1L) @Max(5000L) Long userId,
                                            Pageable pageable) {
         Page<OrderDTO> orderDTOPage = Objects.isNull(userId) ? orderService.findAll(pageable) :
-                orderService.findOrdersByUserID(userId, pageable);
+                orderService.findOrdersByUserId(userId, pageable);
         HATEOASBuilder.addLinksToListOrder(orderDTOPage.getContent(), pageable);
         return pagedResourcesAssembler.toModel(orderDTOPage);
     }
@@ -84,7 +84,7 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN, ROLE_USER')")
     public ResponseEntity<OrderDTO> create(@RequestBody CreateOrderDTO createOrderDTO) {
-        OrderDTO orderDTO = orderService.createOrUpdate(createOrderDTO);
+        OrderDTO orderDTO = orderService.upsert(createOrderDTO);
         HATEOASBuilder.addLinksToOrder(orderDTO);
         return ResponseEntity.of(Optional.of(orderDTO));
     }

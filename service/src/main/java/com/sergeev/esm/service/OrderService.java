@@ -16,5 +16,5 @@ public interface OrderService extends BaseService<OrderDTO> {
      * @param pageable the request page
      * @return the list
      */
-    Page<OrderDTO> findOrdersByUserID(Long userId, Pageable pageable);
+    Page<OrderDTO> findOrdersByUserId(Long userId, Pageable pageable);
 }

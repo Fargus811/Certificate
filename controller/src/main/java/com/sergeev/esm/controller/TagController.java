@@ -80,7 +80,7 @@ public class TagController {
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TagDTO> createTag(@Valid @RequestBody TagDTO tagDTO) {
-        TagDTO resultDTO = tagService.createOrUpdate(tagDTO);
+        TagDTO resultDTO = tagService.upsert(tagDTO);
         HATEOASBuilder.addLinksToTag(resultDTO);
         return ResponseEntity.ok(resultDTO);
     }
@@ -106,7 +106,7 @@ public class TagController {
     @PutMapping
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<TagDTO> updateTag(@Valid @RequestBody TagDTO tagDTO) {
-        TagDTO updatedTag = tagService.createOrUpdate(tagDTO);
+        TagDTO updatedTag = tagService.upsert(tagDTO);
         HATEOASBuilder.addLinksToTag(updatedTag);
         return ResponseEntity.ok(updatedTag);
     }

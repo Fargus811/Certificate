@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
         }
 
         Role roleUser = roleRepository.findByName(ROLE_USER_FROM_DB)
-                .orElseThrow(() -> new ResourceFoundException(new ObjectError(userForm.getUsername(),
+                .orElseThrow(() -> new ResourceFoundException(new ObjectError(ROLE_USER_FROM_DB,
                         "Exception.roleWithNameNotFound")));
 
         User user = User.builder()
